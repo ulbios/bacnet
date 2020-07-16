@@ -65,3 +65,59 @@ func TestUnconfirmedWhoIs(t *testing.T) {
 		})
 	}
 }
+
+func TestBoolToInt(t *testing.T) {
+	cases := []struct {
+		description string
+		b           bool
+		i           int
+	}{
+		{
+			"case of true",
+			true,
+			1,
+		},
+		{
+			"case of false",
+			false,
+			0,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.description, func(t *testing.T) {
+			if got, want := bacnet.BoolToInt(c.b), c.i; got != want {
+				t.Fail()
+			}
+
+		})
+	}
+}
+
+func TestIntToBool(t *testing.T) {
+	cases := []struct {
+		description string
+		b           bool
+		i           int
+	}{
+		{
+			"case of true",
+			true,
+			1,
+		},
+		{
+			"case of false",
+			false,
+			0,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.description, func(t *testing.T) {
+			if got, want := bacnet.IntToBool(c.i), c.b; got != want {
+				t.Fail()
+			}
+
+		})
+	}
+}
