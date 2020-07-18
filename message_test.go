@@ -66,6 +66,56 @@ func TestUnconfirmedWhoIs(t *testing.T) {
 	}
 }
 
+func TestUnconfirmedIAm(t *testing.T) {
+	t.Helper()
+	var testcases = []testCase{
+		{
+			description: "Unconfirmed request IAm frame",
+			structured: bacnet.NewUnconfirmedIAm(
+				bacnet.NewBVLC(bacnet.BVLCFuncBroadcast),
+				bacnet.NewNPDU(false, false, false, false),
+			),
+			serialized: []byte{
+				0x81, 0x0b, 0x00, 0x14, // BVLC
+				0x01, 0x00, // NPDU
+				0x10, 0x00, // APDU
+				0xc4, 0x02, 0x00, 0x00, 0x01, // device object
+				0x22, 0x04, 0x00, // Max APDU length accepted
+				0x91, 0x00, // Segmentation supported
+				0x21, 0x01, // Vendor ID
+			},
+		},
+	}
+
+	for _, c := range testcases {
+		t.Run(c.description, func(t *testing.T) {
+			/*
+				t.Run("Decode", func(t *testing.T) {
+					msg, err := bacnet.Parse(c.serialized)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					got, want := msg, c.structured
+					if diff := cmp.Diff(got, want); diff != "" {
+						t.Errorf("differs: (+got -want)\n%s", diff)
+					}
+				})
+			*/
+			t.Run("Serialize", func(t *testing.T) {
+				b, err := c.structured.MarshalBinary()
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				want, got := c.serialized, b
+				if diff := cmp.Diff(want, got); diff != "" {
+					t.Errorf("differs: (-want got+)\n%s", diff)
+				}
+			})
+		})
+	}
+}
 func TestBoolToInt(t *testing.T) {
 	cases := []struct {
 		description string

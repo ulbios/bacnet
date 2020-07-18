@@ -173,11 +173,11 @@ type APDU struct {
 }
 
 // NewAPDU creates an APDU.
-func NewAPDU(t, c uint8, o []Object) *APDU {
+func NewAPDU(t, s uint8, objs []Object) *APDU {
 	return &APDU{
 		Type:    t,
-		Service: c,
-		Objects: o,
+		Service: s,
+		Objects: objs,
 	}
 }
 
@@ -239,15 +239,17 @@ func (a *APDU) MarshalTo(b []byte) error {
 				if err != nil {
 					return err
 				}
-				copy(b[offset:o.MarshalLen()], ob)
-				offset++
 
-				if offset >= a.MarshalLen() {
+				copy(b[offset:offset+o.MarshalLen()], ob)
+				offset += int(o.Length) + 1
+
+				if offset > a.MarshalLen() {
 					return ErrTooShortToMarshalBinary
 				}
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -292,6 +294,23 @@ func (a *APDU) SetAPDUFlags(sa, moreSegments, segmentedReq bool) {
 	)
 }
 
+// Tag number
+const (
+	TagZero uint8 = iota
+	TagBoolean
+	TagUnsignedInteger
+	TagSignedInteger
+	TagReal
+	TagDouble
+	TagOctetString
+	TagCharacterString
+	TagBitString
+	TagEnumerated
+	TagDate
+	TagTime
+	TagBACnetObjectIdentifier
+)
+
 // Object is an object in APDU.
 type Object struct {
 	TagNumber uint8
@@ -301,12 +320,11 @@ type Object struct {
 }
 
 // NewObject creates an Object.
-func NewObject(n uint8, c bool, d []byte) *Object {
+func NewObject(number uint8, class bool, data []byte) *Object {
 	return &Object{
-		TagNumber: n,
-		TagClass:  c,
-		Length:    uint8(len(d)),
-		Data:      d,
+		TagNumber: number,
+		TagClass:  class,
+		Data:      data,
 	}
 }
 
@@ -357,12 +375,158 @@ func (o *Object) MarshalLen() int {
 	return 1 + int(o.Length)
 }
 
+// UnconfirmedIAm is a BACnet message.
+type UnconfirmedIAm struct {
+	*BVLC
+	*NPDU
+	*APDU
+}
+
+// SetDevice sets the values of device object.
+func (o *Object) SetDevice(insNum uint32) {
+	data := make([]byte, 4)
+	objType := 8
+	binary.BigEndian.PutUint32(data[:], uint32(objType<<22)|insNum)
+
+	o.TagNumber = TagBACnetObjectIdentifier
+	o.TagClass = false
+	o.Data = data
+	o.Length = uint8(len(data))
+}
+
+// SetMaxAPDULenAccepted sets the values of Maximum APDU Length Accepted object.
+func (o *Object) SetMaxAPDULenAccepted(size uint16) {
+	data := make([]byte, 2)
+	binary.BigEndian.PutUint16(data[:], size)
+
+	o.TagNumber = TagUnsignedInteger
+	o.TagClass = false
+	o.Data = data
+	o.Length = uint8(len(data))
+}
+
+// SetSegmentationSupported sets the values of Segmentation supported object.
+func (o *Object) SetSegmentationSupported(supportedSeg uint8) {
+	data := make([]byte, 1)
+	data[0] = supportedSeg
+
+	o.TagNumber = TagEnumerated
+	o.TagClass = false
+	o.Data = data
+	o.Length = uint8(len(data))
+}
+
+// SetVendorID sets the values of VendorID object.
+func (o *Object) SetVendorID(vendorID uint8) {
+	data := make([]byte, 1)
+	data[0] = vendorID
+
+	o.TagNumber = TagUnsignedInteger
+	o.TagClass = false
+	o.Data = data
+	o.Length = uint8(len(data))
+}
+
+// IAmObjects creates an instance of UnconfirmedIAm objects.
+func IAmObjects(insNum uint32, acceptedSize uint16, supportedSeg uint8, vendorID uint8) []Object {
+	objs := make([]Object, 4)
+
+	objs[0].SetDevice(insNum)
+	objs[1].SetMaxAPDULenAccepted(acceptedSize)
+	objs[2].SetSegmentationSupported(supportedSeg)
+	objs[3].SetVendorID(vendorID)
+
+	return objs
+}
+
+// NewUnconfirmedIAm creates a UnconfirmedIam.
+func NewUnconfirmedIAm(bvlc *BVLC, npdu *NPDU) *UnconfirmedIAm {
+	u := &UnconfirmedIAm{
+		BVLC: bvlc,
+		NPDU: npdu,
+		// TODO: Consider to implement parameter struct to an argment of New functions.
+		APDU: NewAPDU(UnConfirmedReq, ServiceUnconfirmedIAm, IAmObjects(1, 1024, 0, 1)),
+	}
+	u.SetLength()
+
+	return u
+}
+
+// UnmarshalBinary sets the values retrieved from byte sequence in a UnconfirmedIAm frame.
+func (u *UnconfirmedIAm) UnmarshalBinary(b []byte) error {
+	if l := len(b); l < u.MarshalLen() {
+		return ErrTooShortToParse
+	}
+
+	var offset int = 0
+	if err := u.BVLC.UnmarshalBinary(b[offset:]); err != nil {
+		return ErrTooShortToParse
+	}
+	offset += u.BVLC.MarshalLen()
+
+	if err := u.NPDU.UnmarshalBinary(b[offset:]); err != nil {
+		return ErrTooShortToParse
+	}
+	offset += u.NPDU.MarshalLen()
+
+	if err := u.APDU.UnmarshalBinary(b[offset:]); err != nil {
+		return ErrTooShortToParse
+	}
+
+	return nil
+}
+
+// MarshalBinary returns the byte sequence generated from a UnconfirmedIAm instance.
+func (u *UnconfirmedIAm) MarshalBinary() ([]byte, error) {
+	b := make([]byte, u.MarshalLen())
+	if err := u.MarshalTo(b); err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+// MarshalTo puts the byte sequence in the byte array given as b.
+func (u *UnconfirmedIAm) MarshalTo(b []byte) error {
+	if len(b) < u.MarshalLen() {
+		return ErrTooShortToMarshalBinary
+	}
+	var offset = 0
+	if err := u.BVLC.MarshalTo(b[offset:]); err != nil {
+		return err
+	}
+	offset += u.BVLC.MarshalLen()
+
+	if err := u.NPDU.MarshalTo(b[offset:]); err != nil {
+		return err
+	}
+	offset += u.NPDU.MarshalLen()
+
+	if err := u.APDU.MarshalTo(b[offset:]); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalLen returns the serial length of UnconfirmedIAm.
+func (u *UnconfirmedIAm) MarshalLen() int {
+	l := u.BVLC.MarshalLen()
+	l += u.NPDU.MarshalLen()
+	l += u.APDU.MarshalLen()
+
+	return l
+}
+
+// SetLength sets the length in Length field.
+func (u *UnconfirmedIAm) SetLength() {
+	u.BVLC.Length = uint16(u.MarshalLen())
+}
+
 // UnconfirmedWhoIs is a BACnet message.
 type UnconfirmedWhoIs struct {
 	*BVLC
 	*NPDU
 	*APDU
-	*Object
 }
 
 // NewUnconfirmedWhoIs creates a UnconfirmedWhoIs.
@@ -432,7 +596,7 @@ func (u *UnconfirmedWhoIs) MarshalTo(b []byte) error {
 	return nil
 }
 
-// MarshalLen returns the serial length of WhoIs.
+// MarshalLen returns the serial length of UnconfirmedWhoIs.
 func (u *UnconfirmedWhoIs) MarshalLen() int {
 	l := u.BVLC.MarshalLen()
 	l += u.NPDU.MarshalLen()
@@ -526,7 +690,7 @@ func Parse(b []byte) (BACnet, error) {
 	case combine(UnConfirmedReq<<4, ServiceUnconfirmedWhoIs):
 		bacnet = NewUnconfirmedWhoIs(bvlc, npdu)
 	case combine(UnConfirmedReq<<4, ServiceUnconfirmedIAm):
-		// TODO: bacnet = NewUnconfirmedIam(bvlc, npdu)
+		bacnet = NewUnconfirmedIAm(bvlc, npdu)
 	default:
 		return nil, ErrNotImplemented
 	}

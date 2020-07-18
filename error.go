@@ -11,4 +11,5 @@ var (
 	ErrTooShortToMarshalBinary = errors.New("insufficient buffer to serialize parameter to")
 	ErrTooShortToParse         = errors.New("too short to decode as parameter")
 	ErrNotImplemented          = errors.New("not implemented type")
+	ErrTooBigValue             = errors.New("too big value")
 )
