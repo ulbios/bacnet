@@ -47,9 +47,9 @@ func TestUnconfirmedWhoIs(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				got, want := msg, c.structured
-				if diff := cmp.Diff(got, want); diff != "" {
-					t.Errorf("differs: (+got -want)\n%s", diff)
+				want, got := c.structured, msg
+				if diff := cmp.Diff(want, got); diff != "" {
+					t.Errorf("differs: (-want +got)\n%s", diff)
 				}
 			})
 			t.Run("Serialize", func(t *testing.T) {
@@ -57,9 +57,9 @@ func TestUnconfirmedWhoIs(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				got, want := b, c.serialized
-				if diff := cmp.Diff(got, want); diff != "" {
-					t.Errorf("differs: (+got -want)\n%s", diff)
+				want, got := c.serialized, b
+				if diff := cmp.Diff(want, got); diff != "" {
+					t.Errorf("differs: (-want +got)\n%s", diff)
 				}
 			})
 		})
@@ -89,19 +89,17 @@ func TestUnconfirmedIAm(t *testing.T) {
 
 	for _, c := range testcases {
 		t.Run(c.description, func(t *testing.T) {
-			/*
-				t.Run("Decode", func(t *testing.T) {
-					msg, err := bacnet.Parse(c.serialized)
-					if err != nil {
-						t.Fatal(err)
-					}
+			t.Run("Decode", func(t *testing.T) {
+				msg, err := bacnet.Parse(c.serialized)
+				if err != nil {
+					t.Fatal(err)
+				}
 
-					got, want := msg, c.structured
-					if diff := cmp.Diff(got, want); diff != "" {
-						t.Errorf("differs: (+got -want)\n%s", diff)
-					}
-				})
-			*/
+				want, got := c.structured, msg
+				if diff := cmp.Diff(want, got); diff != "" {
+					t.Errorf("differs: (-want +got)\n%s", diff)
+				}
+			})
 			t.Run("Serialize", func(t *testing.T) {
 				b, err := c.structured.MarshalBinary()
 				if err != nil {
@@ -110,7 +108,7 @@ func TestUnconfirmedIAm(t *testing.T) {
 
 				want, got := c.serialized, b
 				if diff := cmp.Diff(want, got); diff != "" {
-					t.Errorf("differs: (-want got+)\n%s", diff)
+					t.Errorf("differs: (-want +got)\n%s", diff)
 				}
 			})
 		})

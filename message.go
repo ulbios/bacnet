@@ -202,11 +202,12 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 				o := Object{
 					TagNumber: b[offset] >> 4,
 					TagClass:  IntToBool(int(b[offset]) & 0x8 >> 3),
-					Length:    b[offset+1],
+					Length:    b[offset] & 0x7,
 				}
-				o.Data = b[offset+2 : o.Length]
+
+				o.Data = b[offset+1 : offset+int(o.Length)+1]
 				objs = append(objs, o)
-				offset++
+				offset += int(o.Length) + 1
 
 				if offset >= len(b) {
 					break
