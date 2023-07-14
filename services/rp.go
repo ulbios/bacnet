@@ -1,8 +1,6 @@
 package services
 
 import (
-	"log"
-
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 	"github.com/ulbios/bacnet/plumbing"
@@ -118,7 +116,6 @@ func (c *ConfirmedReadProperty) Decode() (ConfirmedReadPropertyDec, error) {
 	for i, obj := range c.APDU.Objects {
 		switch i {
 		case 0:
-			log.Printf("trying to decode Object identifier from: %v\n", obj)
 			objId, err := objects.DecObjectIdentifier(obj)
 			if err != nil {
 				return decCRP, err
@@ -126,7 +123,6 @@ func (c *ConfirmedReadProperty) Decode() (ConfirmedReadPropertyDec, error) {
 			decCRP.ObjectType = objId.ObjectType
 			decCRP.InstanceId = objId.InstanceNumber
 		case 1:
-			log.Printf("trying to decode Property identifier from: %v\n", obj)
 			propId, err := objects.DecPropertyIdentifier(obj)
 			if err != nil {
 				return decCRP, err

@@ -19,10 +19,12 @@ type ConfirmedWritePropertyDec struct {
 	ObjectType uint16
 	InstanceId uint32
 	PropertyId uint8
+	Value      float32
+	Priority   uint8
 }
 
 func ConfirmedWritePropertyObjects(objectType uint16, instN uint32, propertyId uint8, value float32) []objects.APDUPayload {
-	objs := make([]objects.APDUPayload, 6)
+	objs := make([]objects.APDUPayload, 7)
 
 	objs[0] = objects.EncObjectIdentifier(true, 0, objectType, instN)
 	objs[1] = objects.EncPropertyIdentifier(true, 1, propertyId)
@@ -30,6 +32,7 @@ func ConfirmedWritePropertyObjects(objectType uint16, instN uint32, propertyId u
 	objs[3] = objects.EncReal(value)
 	objs[4] = objects.EncNull()
 	objs[5] = objects.EncClosingTag(3)
+	objs[6] = objects.EncPriority(true, 4, 16)
 
 	return objs
 }
@@ -111,10 +114,10 @@ func (c *ConfirmedWriteProperty) SetLength() {
 }
 
 func (c *ConfirmedWriteProperty) Decode() (ConfirmedWritePropertyDec, error) {
-	decCRP := ConfirmedWritePropertyDec{}
+	decCWP := ConfirmedWritePropertyDec{}
 
-	if len(c.APDU.Objects) != 2 {
-		return decCRP, common.ErrWrongObjectCount
+	if len(c.APDU.Objects) != 5 {
+		return decCWP, common.ErrWrongObjectCount
 	}
 
 	for i, obj := range c.APDU.Objects {
@@ -123,19 +126,35 @@ func (c *ConfirmedWriteProperty) Decode() (ConfirmedWritePropertyDec, error) {
 			log.Printf("trying to decode Object identifier from: %v\n", obj)
 			objId, err := objects.DecObjectIdentifier(obj)
 			if err != nil {
-				return decCRP, err
+				return decCWP, err
 			}
-			decCRP.ObjectType = objId.ObjectType
-			decCRP.InstanceId = objId.InstanceNumber
+			decCWP.ObjectType = objId.ObjectType
+			decCWP.InstanceId = objId.InstanceNumber
 		case 1:
 			log.Printf("trying to decode Property identifier from: %v\n", obj)
 			propId, err := objects.DecPropertyIdentifier(obj)
 			if err != nil {
-				return decCRP, err
+				return decCWP, err
 			}
-			decCRP.PropertyId = propId
+			decCWP.PropertyId = propId
+		case 2:
+			log.Printf("trying to decode Value from: %v\n", obj)
+			value, err := objects.DecReal(obj)
+			if err != nil {
+				return decCWP, err
+			}
+			decCWP.Value = value
+		case 3:
+			log.Printf("got NULL object: %v\n", obj)
+		case 4:
+			log.Printf("trying to decode Priority from: %v\n", obj)
+			priority, err := objects.DecPriority(obj)
+			if err != nil {
+				return decCWP, err
+			}
+			decCWP.Priority = priority
 		}
 	}
 
-	return decCRP, nil
+	return decCWP, nil
 }
