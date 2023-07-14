@@ -1,0 +1,4 @@
+[submodule "bacnet-stack"]
+	path = bacnet-stack
+	url = https://github.com/bacnet-stack/bacnet-stack.git
+	ignore = all

@@ -1,6 +1,7 @@
-# Ignore hidden files except the .gitignore
+# Ignore hidden files except the .gitignore and .gitmodules
 .*
 !.gitignore
+!.gitmodules
 
 # Binaries for programs and plugins
 *.exe
@@ -9,14 +10,10 @@
 *.so
 *.dylib
 *.ex
+bin/
 
 # Test binary, built with `go test -c`
 *.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-
-.envrc
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
