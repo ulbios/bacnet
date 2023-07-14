@@ -1,0 +1,46 @@
+package services
+
+// Services in APDU of which type is unconfirmed request.
+const (
+	ServiceUnconfirmedIAm uint8 = iota
+	ServiceUnconfirmedIHave
+	ServiceUnconfirmedCOVNotification
+	ServiceUnconfirmedEventNotification
+	ServiceUnconfirmedPrivateTransfer
+	ServiceUnconfirmedTextMessage
+	ServiceUnconfirmedTimeSync
+	ServiceUnconfirmedWhoHas
+	ServiceUnconfirmedWhoIs
+	ServiceUnconfirmedUTCTimeSync
+	ServiceUnconfirmedWriteGroup
+)
+
+// Services in APDU of which type is confirmed request.
+const (
+	ServiceConfirmedAcknowledgeAlarm uint8 = iota
+	ServiceConfirmedCOVNotification
+	ServiceConfirmedEventNotification
+	ServiceConfirmedGetAlarmSummary
+	ServiceConfirmedGetEnrollmentSummary
+	ServiceConfirmedSubscribeCOV
+	ServiceConfirmedAtomicReadFile
+	ServiceConfirmedAtomicWriteFile
+	ServiceConfirmedAddListElement
+	ServiceConfirmedRemoveListElement
+	ServiceConfirmedCreateObject
+	ServiceConfirmedDeleteObject
+	ServiceConfirmedReadProperty
+	ServiceConfirmedReadPropConditional
+	ServiceConfirmedReadPropMultiple
+	ServiceConfirmedWriteProperty
+	ServiceConfirmedWritePropMultiple
+	ServiceConfirmedDeviceCommunicationControl
+	ServiceConfirmedPrivateTransfer
+	ServiceConfirmedTextMessage
+	ServiceConfirmedReinitializeDevice
+	ServiceConfirmedVTOpen
+	ServiceConfirmedVTClose
+	ServiceConfirmedVTData
+	ServiceConfirmedAuthenticate
+	ServiceConfirmedRequestKey
+)
