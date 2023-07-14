@@ -1,9 +1,14 @@
+# Ignore hidden files except the .gitignore
+.*
+!.gitignore
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+*.ex
 
 # Test binary, built with `go test -c`
 *.test
