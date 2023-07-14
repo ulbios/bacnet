@@ -1,8 +1,6 @@
 package services
 
 import (
-	"log"
-
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 	"github.com/ulbios/bacnet/plumbing"
@@ -123,7 +121,6 @@ func (c *ConfirmedWriteProperty) Decode() (ConfirmedWritePropertyDec, error) {
 	for i, obj := range c.APDU.Objects {
 		switch i {
 		case 0:
-			log.Printf("trying to decode Object identifier from: %v\n", obj)
 			objId, err := objects.DecObjectIdentifier(obj)
 			if err != nil {
 				return decCWP, err
@@ -131,23 +128,18 @@ func (c *ConfirmedWriteProperty) Decode() (ConfirmedWritePropertyDec, error) {
 			decCWP.ObjectType = objId.ObjectType
 			decCWP.InstanceId = objId.InstanceNumber
 		case 1:
-			log.Printf("trying to decode Property identifier from: %v\n", obj)
 			propId, err := objects.DecPropertyIdentifier(obj)
 			if err != nil {
 				return decCWP, err
 			}
 			decCWP.PropertyId = propId
 		case 2:
-			log.Printf("trying to decode Value from: %v\n", obj)
 			value, err := objects.DecReal(obj)
 			if err != nil {
 				return decCWP, err
 			}
 			decCWP.Value = value
-		case 3:
-			log.Printf("got NULL object: %v\n", obj)
 		case 4:
-			log.Printf("trying to decode Priority from: %v\n", obj)
 			priority, err := objects.DecPriority(obj)
 			if err != nil {
 				return decCWP, err
