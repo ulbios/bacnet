@@ -2,7 +2,7 @@ package objects
 
 // Tag number
 const (
-	TagZero uint8 = iota
+	TagNull uint8 = iota
 	TagBoolean
 	TagUnsignedInteger
 	TagSignedInteger
@@ -21,7 +21,7 @@ const (
 
 // Be sure to check ../bacnet-stack/src/bacnet/bacenum.h for more!
 const (
-	ObjectTypeAnalogInput  uint16 = 1
+	ObjectTypeAnalogInput  uint16 = 0
 	ObjectTypeAnalogOutput uint16 = 1
 	ObjectTypeDevice       uint16 = 8
 )

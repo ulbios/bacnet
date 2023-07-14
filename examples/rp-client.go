@@ -15,19 +15,19 @@ import (
 )
 
 func init() {
-	ReadPropertyClientCmd.Flags().Uint16Var(&objectType, "object-type", 1, "Object type to read.")
-	ReadPropertyClientCmd.Flags().Uint32Var(&instanceId, "instance-id", 0, "Instance ID to read.") // Analog-output
-	ReadPropertyClientCmd.Flags().Uint8Var(&propertyId, "property-id", 85, "Property ID to read.") // Current-value
-	ReadPropertyClientCmd.Flags().IntVar(&rpPeriod, "period", 1, "Period, in seconds, between WhoIs requests.")
-	ReadPropertyClientCmd.Flags().IntVar(&nRPs, "messages", 1, "Number of messages to send, being 0 unlimited.")
+	ReadPropertyClientCmd.Flags().Uint16Var(&rpObjectType, "object-type", 1, "Object type to read.")
+	ReadPropertyClientCmd.Flags().Uint32Var(&rpInstanceId, "instance-id", 0, "Instance ID to read.") // Analog-input
+	ReadPropertyClientCmd.Flags().Uint8Var(&rpPropertyId, "property-id", 85, "Property ID to read.") // Current-value
+	ReadPropertyClientCmd.Flags().IntVar(&rpPeriod, "period", 1, "Period, in seconds, between requests.")
+	ReadPropertyClientCmd.Flags().IntVar(&rpN, "messages", 1, "Number of messages to send, being 0 unlimited.")
 }
 
 var (
-	objectType uint16
-	instanceId uint32
-	propertyId uint8
-	rpPeriod   int
-	nRPs       int
+	rpObjectType uint16
+	rpInstanceId uint32
+	rpPropertyId uint8
+	rpPeriod     int
+	rpN          int
 
 	ReadPropertyClientCmd = &cobra.Command{
 		Use:   "rpc",
@@ -50,7 +50,7 @@ func ReadPropertyClientExample(cmd *cobra.Command, args []string) {
 	}
 	defer listenConn.Close()
 
-	mReadProperty, err := bacnet.NewReadProperty(objectType, instanceId, propertyId)
+	mReadProperty, err := bacnet.NewReadProperty(rpObjectType, rpInstanceId, rpPropertyId)
 	if err != nil {
 		log.Fatalf("error generating initial ReadProperty: %v\n", err)
 	}
@@ -93,7 +93,7 @@ func ReadPropertyClientExample(cmd *cobra.Command, args []string) {
 
 		sentRequests++
 
-		if sentRequests == nRPs {
+		if sentRequests == rpN {
 			break
 		}
 

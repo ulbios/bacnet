@@ -74,6 +74,15 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					Length:    b[offset] & 0x7,
 				}
 
+				// Drop tags so that they don't get in the way!
+				if b[offset] == objects.TagOpening || b[offset] == objects.TagClosing {
+					offset++
+					if offset >= len(b) {
+						break
+					}
+					continue
+				}
+
 				o.Data = b[offset+1 : offset+int(o.Length)+1]
 				objs = append(objs, &o)
 				offset += int(o.Length) + 1
@@ -89,7 +98,7 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 		offset++
 		a.Service = b[offset]
 		offset++
-		if len(b) > 2 {
+		if len(b) > 3 {
 			objs := []objects.APDUPayload{}
 			for {
 				o := objects.Object{

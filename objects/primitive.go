@@ -109,3 +109,27 @@ func EncReal(value float32) *Object {
 
 	return &newObj
 }
+
+func DecNull(rawPayload APDUPayload) (bool, error) {
+	rawObject, ok := rawPayload.(*Object)
+	if !ok {
+		return false, common.ErrWrongPayload
+	}
+
+	if rawObject.TagNumber != TagReal {
+		return false, common.ErrWrongStructure
+	}
+
+	return rawObject.TagNumber == TagNull && !rawObject.TagClass && rawObject.Length == 0, nil
+}
+
+func EncNull() *Object {
+	newObj := Object{}
+
+	newObj.TagNumber = TagNull
+	newObj.TagClass = false
+	newObj.Data = nil
+	newObj.Length = 0
+
+	return &newObj
+}
