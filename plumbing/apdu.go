@@ -100,6 +100,15 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					Length:    b[offset] & 0x7,
 				}
 
+				// Drop tags so that they don't get in the way!
+				if b[offset] == objects.TagOpening || b[offset] == objects.TagClosing {
+					offset++
+					if offset >= len(b) {
+						break
+					}
+					continue
+				}
+
 				o.Data = b[offset+1 : offset+int(o.Length)+1]
 				objs = append(objs, &o)
 				offset += int(o.Length) + 1
@@ -144,7 +153,33 @@ func (a *APDU) MarshalTo(b []byte) error {
 				}
 			}
 		}
-	case ConfirmedReq, ComplexAck, Error:
+	case ComplexAck, SimpleAck, Error:
+		b[offset] = a.InvokeID
+		offset++
+		b[offset] = a.Service
+		offset++
+		if a.MarshalLen() > 4 {
+			for i, o := range a.Objects {
+				ob, err := o.MarshalBinary()
+				if err != nil {
+					return err
+				}
+
+				log.Printf("marshalling object %d: %x\n", i, ob)
+
+				copy(b[offset:offset+o.MarshalLen()], ob)
+				offset += o.MarshalLen()
+
+				log.Printf("current APDU length: %d\n", len(b))
+
+				if offset > a.MarshalLen() {
+					return common.ErrTooShortToMarshalBinary
+				}
+			}
+		}
+	case ConfirmedReq:
+		b[offset] |= (a.MaxSeg & 0x7 << 4) | (a.MaxSize & 0xF)
+		offset++
 		b[offset] = a.InvokeID
 		offset++
 		b[offset] = a.Service

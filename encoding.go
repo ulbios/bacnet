@@ -77,3 +77,19 @@ func NewError(service, errorClass, errorCode uint8) ([]byte, error) {
 
 	return e.MarshalBinary()
 }
+
+func NewReadProperty(objectType uint16, instanceNumber uint32, propertyId uint8) ([]byte, error) {
+	bvlc := plumbing.NewBVLC(plumbing.BVLCFuncUnicast)
+	npdu := plumbing.NewNPDU(false, false, false, true)
+
+	c := services.NewConfirmedReadProperty(bvlc, npdu)
+
+	c.APDU.Service = services.ServiceConfirmedReadProperty
+	c.APDU.MaxSize = 5
+	c.APDU.InvokeID = 1
+	c.APDU.Objects = services.ConfirmedReadPropertyObjects(objectType, instanceNumber, propertyId)
+
+	c.SetLength()
+
+	return c.MarshalBinary()
+}

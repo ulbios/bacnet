@@ -83,28 +83,17 @@ func EncEnumerated(value uint8) *Object {
 	return &newObj
 }
 
-func DecReal(rawPayload APDUPayload) (uint32, error) {
+func DecReal(rawPayload APDUPayload) (float32, error) {
 	rawObject, ok := rawPayload.(*Object)
 	if !ok {
 		return 0, common.ErrWrongPayload
 	}
 
-	if rawObject.TagNumber != TagUnsignedInteger || rawObject.TagClass {
+	if rawObject.TagNumber != TagReal || rawObject.TagClass {
 		return 0, common.ErrWrongStructure
 	}
 
-	switch rawObject.Length {
-	case 1:
-		return uint32(rawObject.Data[0]), nil
-	case 2:
-		return uint32(binary.BigEndian.Uint16(rawObject.Data)), nil
-	case 3:
-		return uint32(uint16(uint32(rawObject.Data[0])<<16) | binary.BigEndian.Uint16(rawObject.Data[1:])), nil
-	case 4:
-		return binary.BigEndian.Uint32(rawObject.Data), nil
-	}
-
-	return 0, common.ErrNotImplemented
+	return math.Float32frombits(binary.BigEndian.Uint32(rawObject.Data)), nil
 }
 
 func EncReal(value float32) *Object {

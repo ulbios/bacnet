@@ -11,17 +11,17 @@ import (
 )
 
 var (
-	ReadPropertyCmd = &cobra.Command{
-		Use:   "rp",
-		Short: "Reply with Complex ACKs.",
+	ReadPropertyServerCmd = &cobra.Command{
+		Use:   "rps",
+		Short: "Reply ReadProperty requests with Complex ACKs.",
 		Long: "This example will wait until it receives a ReadProperty request. Upon reception\n" +
 			"it'll just reply with the configured Complex ACK fields",
 		Args: argValidation,
-		Run:  ReadPropertyExample,
+		Run:  ReadPropertyServerExample,
 	}
 )
 
-func ReadPropertyExample(cmd *cobra.Command, args []string) {
+func ReadPropertyServerExample(cmd *cobra.Command, args []string) {
 	listenConn, err := net.ListenPacket("udp", bAddr)
 	if err != nil {
 		log.Fatalf("failed to begin listening for packets: %v\n", err)

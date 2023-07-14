@@ -16,18 +16,18 @@ import (
 )
 
 func init() {
-	whoIsCmd.Flags().IntVar(&period, "period", 1, "Period, in seconds, between WhoIs requests.")
+	whoIsCmd.Flags().IntVar(&wiPeriod, "period", 1, "Period, in seconds, between WhoIs requests.")
 	whoIsCmd.Flags().IntVar(&nWhoIs, "messages", 1, "Number of messages to send, being 0 unlimited.")
 }
 
 var (
-	period int
-	nWhoIs int
+	wiPeriod int
+	nWhoIs   int
 
 	whoIsCmd = &cobra.Command{
 		Use:   "whois",
 		Short: "Send WhoIs requests.",
-		Long: "There's not much more really. This comman sends a configurable number of\n" +
+		Long: "There's not much more really. This command sends a configurable number of\n" +
 			"WhoIs requests with a configurable period. That's pretty much it.",
 		Args: argValidation,
 		Run:  whoIsExample,
@@ -109,6 +109,6 @@ func whoIsExample(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		time.Sleep(time.Duration(period) * time.Second)
+		time.Sleep(time.Duration(wiPeriod) * time.Second)
 	}
 }

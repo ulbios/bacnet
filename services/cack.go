@@ -1,8 +1,6 @@
 package services
 
 import (
-	"log"
-
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 	"github.com/ulbios/bacnet/plumbing"
@@ -115,40 +113,33 @@ func (u *ComplexACK) SetLength() {
 func (c *ComplexACK) Decode() (ComplexACKDec, error) {
 	decCACK := ComplexACKDec{}
 
-	if len(c.APDU.Objects) != 4 {
+	if len(c.APDU.Objects) != 3 {
 		return decCACK, common.ErrWrongObjectCount
 	}
 
-	log.Printf("trying to decode CACK from APDU: %#v\n", c.APDU)
-
-	// for i, obj := range c.APDU.Objects {
-	// 	switch i {
-	// 	case 0:
-	// 		objId, err := objects.DecObjectIdentifier(obj)
-	// 		if err != nil {
-	// 			return decCACK, err
-	// 		}
-	// 		decCACK.DeviceId = objId.InstanceNumber
-	// 	case 1:
-	// 		maxLen, err := objects.DecUnisgnedInteger(obj)
-	// 		if err != nil {
-	// 			return decCACK, err
-	// 		}
-	// 		decCACK.MaxAPDULength = uint16(maxLen)
-	// 	case 2:
-	// 		segSupport, err := objects.DecEnumerated(obj)
-	// 		if err != nil {
-	// 			return decCACK, err
-	// 		}
-	// 		decCACK.SegmentationSupported = uint8(segSupport)
-	// 	case 3:
-	// 		vendorId, err := objects.DecUnisgnedInteger(obj)
-	// 		if err != nil {
-	// 			return decCACK, err
-	// 		}
-	// 		decCACK.VendorId = uint16(vendorId)
-	// 	}
-	// }
+	for i, obj := range c.APDU.Objects {
+		switch i {
+		case 0:
+			objId, err := objects.DecObjectIdentifier(obj)
+			if err != nil {
+				return decCACK, err
+			}
+			decCACK.ObjectType = objId.ObjectType
+			decCACK.InstanceId = objId.InstanceNumber
+		case 1:
+			propId, err := objects.DecPropertyIdentifier(obj)
+			if err != nil {
+				return decCACK, err
+			}
+			decCACK.PropertyId = propId
+		case 3:
+			value, err := objects.DecReal(obj)
+			if err != nil {
+				return decCACK, err
+			}
+			decCACK.PresentValue = value
+		}
+	}
 
 	return decCACK, nil
 }

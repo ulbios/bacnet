@@ -10,9 +10,17 @@ func DecPropertyIdentifier(rawPayload APDUPayload) (uint8, error) {
 		return 0, common.ErrWrongPayload
 	}
 
-	if rawObject.Length != 1 || !rawObject.TagClass {
-		return 0, common.ErrWrongStructure
+	switch rawObject.TagClass {
+	case true:
+		if rawObject.Length != 1 {
+			return 0, common.ErrWrongStructure
+		}
+	case false:
+		if rawObject.Length != 1 || !rawObject.TagClass {
+			return 0, common.ErrWrongStructure
+		}
 	}
+
 	return rawObject.Data[0], nil
 }
 
