@@ -1,8 +1,6 @@
 package plumbing
 
 import (
-	"log"
-
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 )
@@ -159,18 +157,14 @@ func (a *APDU) MarshalTo(b []byte) error {
 		b[offset] = a.Service
 		offset++
 		if a.MarshalLen() > 4 {
-			for i, o := range a.Objects {
+			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
 					return err
 				}
 
-				log.Printf("marshalling object %d: %x\n", i, ob)
-
 				copy(b[offset:offset+o.MarshalLen()], ob)
 				offset += o.MarshalLen()
-
-				log.Printf("current APDU length: %d\n", len(b))
 
 				if offset > a.MarshalLen() {
 					return common.ErrTooShortToMarshalBinary
@@ -185,48 +179,20 @@ func (a *APDU) MarshalTo(b []byte) error {
 		b[offset] = a.Service
 		offset++
 		if a.MarshalLen() > 4 {
-			for i, o := range a.Objects {
+			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
 					return err
 				}
 
-				log.Printf("marshalling object %d: %x\n", i, ob)
-
 				copy(b[offset:offset+o.MarshalLen()], ob)
 				offset += o.MarshalLen()
-
-				log.Printf("current APDU length: %d\n", len(b))
 
 				if offset > a.MarshalLen() {
 					return common.ErrTooShortToMarshalBinary
 				}
 			}
 		}
-		// case ComplexAck:
-		// 	b[offset] = a.InvokeID
-		// 	offset++
-		// 	b[offset] = a.Service
-		// 	offset++
-		// 	if a.MarshalLen() > 4 {
-		// 		for _, o := range a.Objects {
-		// 			ob, err := o.MarshalBinary()
-		// 			if err != nil {
-		// 				return err
-		// 			}
-
-		// 			// log.Printf("marshalling object %d: %x\n", i, ob)
-
-		// 			copy(b[offset:offset+o.MarshalLen()], ob)
-		// 			offset += o.MarshalLen()
-
-		// 			// log.Printf("current APDU length: %d\n", len(b))
-
-		// 			if offset > a.MarshalLen() {
-		// 				return common.ErrTooShortToMarshalBinary
-		// 			}
-		// 		}
-		// 	}
 	}
 
 	return nil

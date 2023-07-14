@@ -1,6 +1,8 @@
 package services
 
 import (
+	"log"
+
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 	"github.com/ulbios/bacnet/plumbing"
@@ -118,6 +120,7 @@ func (c *ComplexACK) Decode() (ComplexACKDec, error) {
 	}
 
 	for i, obj := range c.APDU.Objects {
+		log.Printf("decoding object %d from: %v\n", i, obj)
 		switch i {
 		case 0:
 			objId, err := objects.DecObjectIdentifier(obj)
@@ -132,7 +135,7 @@ func (c *ComplexACK) Decode() (ComplexACKDec, error) {
 				return decCACK, err
 			}
 			decCACK.PropertyId = propId
-		case 3:
+		case 2:
 			value, err := objects.DecReal(obj)
 			if err != nil {
 				return decCACK, err

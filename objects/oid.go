@@ -31,7 +31,7 @@ func DecObjectIdentifier(rawPayload APDUPayload) (ObjectIdentifier, error) {
 	}
 
 	joinedData := binary.BigEndian.Uint32(rawObject.Data)
-	decObjectId.ObjectType = uint16(joinedData & 0xFFC >> 22)
+	decObjectId.ObjectType = uint16(joinedData & (uint32(0xFFC) << 20) >> 20)
 	decObjectId.InstanceNumber = uint32(joinedData & 0x3FFFFF)
 
 	return decObjectId, nil

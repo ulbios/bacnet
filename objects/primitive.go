@@ -89,7 +89,7 @@ func DecReal(rawPayload APDUPayload) (float32, error) {
 		return 0, common.ErrWrongPayload
 	}
 
-	if rawObject.TagNumber != TagReal || rawObject.TagClass {
+	if rawObject.TagNumber != TagReal {
 		return 0, common.ErrWrongStructure
 	}
 

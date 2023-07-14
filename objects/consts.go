@@ -19,7 +19,9 @@ const (
 	TagClosing uint8 = 0x3F
 )
 
+// Be sure to check ../bacnet-stack/src/bacnet/bacenum.h for more!
 const (
+	ObjectTypeAnalogInput  uint16 = 1
 	ObjectTypeAnalogOutput uint16 = 1
 	ObjectTypeDevice       uint16 = 8
 )
