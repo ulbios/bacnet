@@ -1,0 +1,24 @@
+version: '3'
+
+vars:
+  LINUX_BIN: './bin/bexamples.ex'
+  MAC_BIN: './bin/bexamples.osx.ex'
+  GIT_COMMIT:
+    sh: git log -n 1 --format=%h
+
+tasks:
+  default:
+    desc: "Build the BACnet examples for Linux-based distros."
+    cmds:
+      - go build -o {{.LINUX_BIN}} -ldflags "-X main.commit={{.GIT_COMMIT}}"
+    env:
+      GOOS:   'linux'
+      GOARCH: 'amd64'
+
+  build-mac:
+    desc: "Build the BACnet examples for macOS."
+    cmds:
+      - go build -o {{.MAC_BIN}} -ldflags "-X main.commit={{.GIT_COMMIT}}"
+    env:
+      GOOS:   'darwin'
+      # GOARCH: 'amd64'
