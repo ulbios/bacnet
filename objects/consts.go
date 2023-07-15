@@ -31,7 +31,9 @@ const (
 )
 
 const (
-	ErrorClassObject uint8 = 1
+	ErrorClassObject  uint8 = 1
+	ErrorClassService uint8 = 5
 
-	ErrorCodeUnknownObject uint8 = 31
+	ErrorCodeUnknownObject        uint8 = 31
+	ErrorCodeServiceRequestDenied uint8 = 29
 )
